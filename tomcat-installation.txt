@@ -1,0 +1,83 @@
+Tomcat installation ansible
+---
+- hosts: tomcatserver
+  become: yes
+  remote_user: root
+
+#  vars_prompt:
+#   - name: user
+#     prompt: please enter user
+#   - name: password
+#     prompt: create password =
+#   - name: re-enter your password 
+#     prompt: re enter password =
+  vars:
+     vars_files:
+       group_vars/all
+  tasks:
+   - name: install  jdk
+     yum:
+       name: java-1.7.0-openjdk
+       state: present
+
+   - name: install httpd
+     yum:
+      name: httpd
+      state: installed
+   - name: creating a deirectory
+     file:
+       path: /home/tomcat
+       state: directory
+   - name: get tomcat file
+     get_url:
+        url: https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.11/bin/apache-tomcat-8.5.11.zip
+        dest: /home/tomcat
+   - name: gtar tomcat file
+     yum:
+      name: tar
+      state: latest
+   - name: unzip install
+     yum:
+      name: unzip
+      state: latest
+
+- name: unzip install
+     yum:
+      name: unzip
+      state: latest
+  # - name: unzip tar file
+     # unarchive:
+     # src: /home/tomcat/apache-tomcat-8.5.11.tar.gz
+     # dest: /home/tomcat/
+     # remote_src: True
+   - name: unzip tar file
+     unarchive:
+      src: /home/tomcat/apache-tomcat-8.5.11.zip
+      dest: /home/tomcat/
+      remote_src: True
+   - template:
+       src: /root/ansible_job/excercise_03/template/tomcat-users.j2
+       dest: /home/tomcat/apache-tomcat-8.5.11/conf/tomcat-users.xml
+   - name: copy context file
+     copy:
+       src: /root/ansible_job/excercise_03/context.xml
+       dest: /home/tomcat/apache-tomcat-8.5.11/webapps/manager/META-INF
+   - name: permission
+     file:
+       path: /home/tomcat/apache-tomcat-8.5.11/bin/shutdown.sh
+       mode: "u+x,g+x,o+x"
+   - name: permission
+     file:
+       path: /home/tomcat/apache-tomcat-8.5.11/bin/catalina.sh
+       mode: "u+x,g+x,o+x"
+   - name: permission
+     file:
+       path: /home/tomcat/apache-tomcat-8.5.11/bin/startup.sh
+       mode: "u+x,g+x,o+x"
+#   - name: install tomcat init script
+#     copy: src=/root/ansible_job/excercise_03/tomcat-initscript.sh dest=/etc/init.d/tomcat mode=0755
+ #  - name: stopping Tomcat
+ #    service:
+ #      name: tomcat
+ #      state: stopped
+                                
